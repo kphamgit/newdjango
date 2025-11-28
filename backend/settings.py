@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
+import dj_database_url
 
 load_dotenv()
 
@@ -104,18 +105,47 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #    }
 #}
 
+#DATABASES = {
+#    "default": {
+#        "ENGINE": "django.db.backends.mysql",
+#        "USER": "root",
+#        "NAME": "backend",
+#        "PASSWORD": "ttrami120110",  # Add your MySQL password here
+#        "HOST": "localhost",  # Default host
+#        "PORT": "3306",       # Default MySQL port
+#        "TEST": {
+#            "NAME": "mytestdatabase",
+#        },
+#    },
+#}
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "USER": "root",
-        "NAME": "fullstack",
-        "PASSWORD": "ttrami120110",  # Add your MySQL password here
-        "HOST": "localhost",  # Default host
-        "PORT": "3306",       # Default MySQL port
-        "TEST": {
-            "NAME": "mytestdatabase",
-        },
-    },
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'fullstack',  # Replace with your PostgreSQL database name
+            'USER': 'kevinpham',      # Replace with your PostgreSQL username
+            'PASSWORD': 'ttrami120110',  # Replace with your PostgreSQL password
+            'HOST': 'localhost',
+            'PORT': '5432',
+    }
+}
+
+# Heroku Postgres override using DATABASE_URL
+#DATABASES["default"] = dj_database_url.config(
+#    default=str(DATABASES["default"]),
+#    conn_max_age=600,
+#    ssl_require=True,
+#)
+
+# For production, DATABASE_URL is typically set as an environment variable.
+# Example: DATABASE_URL=postgres://prod_user:prod_password@prod_host:prod_port/prod_db?sslmode=require
+# dj_database_url.config() will automatically pick up the DATABASE_URL environment variable if it exists.
+DATABASES = {
+    'default': dj_database_url.config(
+        default='postgres://user:password@localhost:5432/mydatabase',
+        conn_max_age=600,  # Optional: enable connection pooling
+        ssl_require=False  # Set to True if your production database requires SSL
+    )
 }
 
 
