@@ -119,16 +119,16 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #    },
 #}
 
-DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'fullstack',  # Replace with your PostgreSQL database name
-            'USER': 'kevinpham',      # Replace with your PostgreSQL username
-            'PASSWORD': 'ttrami120110',  # Replace with your PostgreSQL password
-            'HOST': 'localhost',
-            'PORT': '5432',
-    }
-}
+#DATABASES = {
+#        'default': {
+#            'ENGINE': 'django.db.backends.postgresql',
+#            'NAME': 'fullstack',  # Replace with your PostgreSQL database name
+#            'USER': 'kevinpham',      # Replace with your PostgreSQL username
+#            'PASSWORD': 'ttrami120110',  # Replace with your PostgreSQL password
+#            'HOST': 'localhost',
+#            'PORT': '5432',
+#    }
+#}
 
 # Heroku Postgres override using DATABASE_URL
 #DATABASES["default"] = dj_database_url.config(
@@ -142,7 +142,7 @@ DATABASES = {
 # dj_database_url.config() will automatically pick up the DATABASE_URL environment variable if it exists.
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://user:password@localhost:5432/mydatabase',
+        default='postgres://kevinpham:ttrami120110@localhost:5432/fullstack',
         conn_max_age=600,  # Optional: enable connection pooling
         ssl_require=False  # Set to True if your production database requires SSL
     )
