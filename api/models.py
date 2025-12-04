@@ -17,3 +17,34 @@ class Category(models.Model):
     def __str__(self):
         return self.name
         
+class SubCategory(models.Model):
+    name = models.CharField(max_length=100)
+    sub_category_number = models.IntegerField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="subcategories")
+    
+    def __str__(self):
+        return self.name
+
+class Unit(models.Model):
+    name = models.CharField(max_length=100)
+    unit_number = models.IntegerField()
+    sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name="units")
+    
+    def __str__(self):
+        return self.name
+    
+class Quiz(models.Model):
+    name = models.CharField(max_length=100)
+    quiz_number = models.IntegerField()
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="quizzes")
+    
+    def __str__(self):
+        return self.name
+    
+class Question(models.Model):
+    question_number = models.IntegerField()
+    content = models.TextField(max_length=1000, default="")
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
+    
+    def __str__(self):
+        return self.content
