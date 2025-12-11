@@ -34,11 +34,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
+    'english.apps.EnglishConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-   
+    'django_extensions',
 ]
  #'django_extensions',
 
@@ -64,6 +66,8 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+APPEND_SLASH = True    # handle trailing slashes in URLs
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

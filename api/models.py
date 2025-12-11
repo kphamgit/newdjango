@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator
 
 class Note(models.Model):
     title = models.CharField(max_length=100)
@@ -42,9 +43,21 @@ class Quiz(models.Model):
         return self.name
     
 class Question(models.Model):
-    question_number = models.IntegerField()
+    question_number = models.IntegerField(default=0)
+    format = models.PositiveSmallIntegerField(
+        validators=[MaxValueValidator(255)], # Restrict range to 0-255
+        default=0
+    )
+    audio_str = models.CharField(max_length=500, blank=True, null=True, default="")
+    instructions = models.TextField(max_length=2000, blank=True,null=True, default="")
+    prompt = models.TextField(max_length=1000, blank=True,null=True, default="")
     content = models.TextField(max_length=1000, default="")
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
+    answer_key = models.TextField(max_length=500, default="")
+    score = models.IntegerField(default=0, null=True)
+    word_scramble_direction = models.CharField(max_length=1, blank=True, null=True, default="")
+    timeout = models.IntegerField(default=0, null=True)  # in miliseconds
     
     def __str__(self):
         return self.content
+    

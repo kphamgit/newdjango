@@ -24,19 +24,27 @@ class NoteSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ["id", "question_number", "content"]
+        #fields = ["id", "question_number", "content", "format", "audio_str", "instructions", "prompt", "answer_key"]
+        fields = '__all__'
         
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = ["id", "name", "quiz_number"]
+        fields = ["id", "name", "quiz_number", "questions"]
         
 
 class UnitSerializer(serializers.ModelSerializer):
     quizzes = QuizSerializer(many=True, read_only=True)
     class Meta:
         model = Unit
-        fields = ["id", "name", "unit_number", "sub_category", "quizzes"]
+        fields = ["id", "name", "unit_number", "quizzes"]
+        
+#class QuizSerializer(serializers.ModelSerializer):
+#    questions = QuestionSerializer(many=True, read_only=True)
+#    class Meta:
+#        model = Unit
+#        fields = ["id", "name", "unit_number", "questions"]
+       
         
         
 class SubCategorySerializer(serializers.ModelSerializer):
