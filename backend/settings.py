@@ -49,9 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'django_extensions',
 ]
- #'django_extensions',
+ #'django_extensions', (add only for developmement purposes)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
