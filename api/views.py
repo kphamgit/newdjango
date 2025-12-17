@@ -6,6 +6,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Note, Category, SubCategory, Unit, Quiz, Question
 
 
+from rest_framework.response import Response
+
+
 class NoteListCreate(generics.ListCreateAPIView):
     serializer_class = NoteSerializer
     permission_classes = [IsAuthenticated]
@@ -40,7 +43,7 @@ class CategoryListCreate(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Category.objects.all()
+        return Category.objects.all().order_by('category_number')
 
     def perform_create(self, serializer):
         if serializer.is_valid():
@@ -50,12 +53,11 @@ class CategoryListCreate(generics.ListCreateAPIView):
 
 
 class CategoryListView(generics.ListAPIView):
-    #queryset = Category.objects.prefetch_related('subcategories')
     serializer_class = CategorySerializer # needed by the Django REST Framework
     # to determine how to serialize the data returned by the get_queryset method
     
     def get_queryset(self):
-        return Category.objects.prefetch_related('subcategories')
+        return Category.objects.order_by('category_number').prefetch_related('sub_categories')
     
 class UnitListView(generics.ListAPIView):
     serializer_class = UnitSerializer
@@ -66,11 +68,23 @@ class UnitListView(generics.ListAPIView):
         sub_category_id = self.kwargs.get('sub_category_id')
         print("UnitListView, sub_category_id:", sub_category_id)
         #queryset = Unit.objects.filter(sub_category_id=sub_category_id).prefetch_related('quizzes')
-        queryset = Unit.objects.filter(sub_category_id=sub_category_id)
+        queryset = Unit.objects.filter(sub_category_id=sub_category_id).order_by('unit_number')
         print("UnitListView, Filtered Units no Prefetch:", queryset)
         print("UnitListView, SQL Query:", queryset.query)  # Debugging SQL query
         return queryset
     
+
+def unit_list(request, pk):
+    """
+    List all units, or create a new snippet.
+    """
+    #print("unit_list called with pk:", request.query_params)
+    #sub_category_id = self.kwargs.get('pk')
+    units = Unit.objects.filter(sub_category_id=pk).order_by('unit_number')
+    serializer = UnitSerializer(units, many=True)
+    return Response(serializer.data)
+
+
 class QuizListView(generics.ListAPIView):
     serializer_class = QuizSerializer
     permission_classes = [IsAuthenticated]
@@ -80,9 +94,9 @@ class QuizListView(generics.ListAPIView):
         unit_id = self.kwargs.get('unit_id')
         print("QuizListView, unit_id:", unit_id)
         #queryset = Unit.objects.filter(sub_category_id=sub_category_id).prefetch_related('quizzes')
-        queryset = Quiz.objects.filter(unit_id=unit_id)
-        print("QuizListView, Filtered Quizzes no Prefetch:", queryset)
-        print("QuizListView, SQL Query:", queryset.query)  # Debugging SQL query
+        queryset = Quiz.objects.filter(unit_id=unit_id).order_by('quiz_number')
+        #print("QuizListView, Filtered Quizzes no Prefetch:", queryset)
+        #print("QuizListView, SQL Query:", queryset.query)  # Debugging SQL query
         return queryset
     
 class QuestionListView(generics.ListAPIView):
@@ -94,7 +108,7 @@ class QuestionListView(generics.ListAPIView):
         quiz_id = self.kwargs.get('quiz_id')
         #print("QuestionListView, quiz_id:", quiz_id)
         #queryset = Unit.objects.filter(sub_category_id=sub_category_id).prefetch_related('quizzes')
-        queryset = Question.objects.filter(quiz_id=quiz_id)
+        queryset = Question.objects.filter(quiz_id=quiz_id).order_by('question_number')
         #print("QuestionListView, Filtered Questions no Prefetch:", queryset)
         #print("QuestionListView, SQL Query:", queryset.query)  # Debugging SQL query
         return queryset
@@ -108,7 +122,7 @@ class SubCategoryListView(generics.ListAPIView):
     def get_queryset(self):
         category_id = self.kwargs.get('category_id')
         #queryset = Unit.objects.filter(category_id=category_id).prefetch_related('quizzes')
-        queryset = SubCategory.objects.filter(category_id=category_id)
-        print("Filtered SubCats:", queryset)
+        queryset = SubCategory.objects.filter(category_id=category_id).order_by('sub_category_number')
+        #print("Filtered SubCats:", queryset)
         #print("SQL Query:", queryset.query)  # Debugging SQL query
         return queryset

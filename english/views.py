@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from api.models import Note, Question, Quiz, Unit, SubCategory, Category
 #from .serializers import NoteSerializer, QuestionSerializer
-from api.serializers import NoteSerializer, QuestionSerializer, QuizSerializer, UnitSerializer, SubCategorySerializer, CategorySerializer, CategorySerializer
+from api.serializers import NoteSerializer, QuestionSerializer, SubCategorySerializer, CategorySerializer, CategorySerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import generics
+from rest_framework.decorators import api_view
+from english.serializers import UnitSerializer, QuizSerializer
 
 # Create your views here.
    
@@ -14,28 +16,35 @@ class QuestionCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        print("perform_create, request data:", self.request.data)
         if serializer.is_valid():
-            serializer.save(question_number=self.request.data.get('question_number'),
-                            format=self.request.data.get('format'),
-                            audio_str=self.request.data.get('audio_str'),
-                            instructions=self.request.data.get('instructions'),
-                            prompt=self.request.data.get('prompt'),
-                            content=self.request.data.get('content'),
-                            quiz_id=self.request.data.get('quiz_id'),
-                            answer_key=self.request.data.get('answer_key')
+            #serializer.save()
+            #kpham: no need for explicit fields since all are included in serializer
+            serializer.save( 
+                question_number=self.request.data.get('question_number'),
+                format=self.request.data.get('format'),
+                content=self.request.data.get('content'),
+                quiz_id=self.request.data.get('quiz_id'),
+                answer_key=self.request.data.get('answer_key'),
+                instructions=self.request.data.get('instructions'),
+               
             )
+            
         else:
             print(serializer.errors)
 
-    
+    #fields = ["id", "unit_id", "name", "quiz_number", "questions"]
 class QuizCreateView(generics.ListCreateAPIView):
     serializer_class = QuizSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
+        print("perform_create, request data:", self.request.data)
         if serializer.is_valid():
-            serializer.save(quiz_number=self.request.data.get('quiz_number'),
-                            name=self.request.data.get('name')
+            serializer.save(
+                unit_id=self.request.data.get('unit_id'),
+                quiz_number=self.request.data.get('quiz_number'),
+                name=self.request.data.get('name')
             )
         else:
             print(serializer.errors)
@@ -46,20 +55,48 @@ class UnitCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-            serializer.save(unit_number=self.request.data.get('unit_number'),
-                            name=self.request.data.get('name')
+            serializer.save(
+                sub_category_id=self.request.data.get('sub_category_id'),
+                unit_number=self.request.data.get('unit_number'),
+                name=self.request.data.get('name')
             )
         else:
             print(serializer.errors)
+           
+@api_view(["GET"])
+def unit_list(request, pk):
+    """
+    List all units, or create a new snippet.
+    """
+    #print("unit_list called with pk:", request.query_params)
+    #sub_category_id = self.kwargs.get('pk')
+    units = Unit.objects.filter(sub_category_id=pk).order_by('unit_number')
+    serializer = UnitSerializer(units, many=True)
+    return Response(serializer.data)
+
+@api_view(["GET"])
+def quiz_list(request, pk):
+    """
+    List all quizzes, 
+    """
+    #print("unit_list called with pk:", request.query_params)
+    #sub_category_id = self.kwargs.get('pk')
+    quizzes = Quiz.objects.filter(unit_id=pk).order_by('quiz_number')
+    serializer = QuizSerializer(quizzes, many=True)
+    return Response(serializer.data)
+
             
 class SubCategoryCreateView(generics.ListCreateAPIView):
     serializer_class = SubCategorySerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        print("SubCategoryCreateView perform_create, request data:", self.request.data)
         if serializer.is_valid():
-            serializer.save(sub_category_number=self.request.data.get('sub_category_number'),
-                            name=self.request.data.get('name')
+            serializer.save(
+                category_id=self.request.data.get('category_id'),
+                sub_category_number=self.request.data.get('sub_category_number'),
+                name=self.request.data.get('name')
             )
         else:
             print(serializer.errors)
@@ -87,12 +124,15 @@ class QuestionEditView(generics.RetrieveUpdateAPIView):
         #print("request data:", self.request.data)
         if serializer.is_valid():
             print("Serializer is valid")
+            serializer.save()
+            """
             serializer.save(
                             audio_str=self.request.data.get('audio_str'),
                             prompt=self.request.data.get('prompt'),
                             content=self.request.data.get('content'),
                             answer_key=self.request.data.get('answer_key')
             )
+            """
         else:
             print(serializer.errors)
             
@@ -186,10 +226,151 @@ class CategoryEditView(generics.RetrieveUpdateAPIView):
             
     def get_queryset(self):
         category_id = self.kwargs.get('pk')
-        print("XXXXXX category_id:", category_id)
+        #print("XXXXXX category_id:", category_id)
         #queryset = Unit.objects.filter(sub_category_id=sub_category_id).prefetch_related('quizzes')
         queryset = Category.objects.filter(id=category_id)
         #print("QuestionListView, Filtered Questions no Prefetch:", queryset)
         #print("QuestionListView, SQL Query:", queryset.query)  # Debugging SQL query
+        return queryset
+    
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+# renumber views
+class CategoryRenumberView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        id_numbers = self.request.data.get('id_number_pairs')
+        # Convert the JSON string representation of the list to an actual list
+        import ast
+        id_numbers = ast.literal_eval(id_numbers)
+        
+        for index, category_id in enumerate(id_numbers, start=1):  # Start numbering from 1
+            try:
+                category = Category.objects.get(id=category_id)
+                category.category_number = index  # Use the index as the new number
+                category.save()
+            except Category.DoesNotExist:
+                print(f"Category with ID {category_id} does not exist.")
+                
+        return Response({"message": "Category renumbered successfully."})
+            
+class SubCategoryRenumberView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        print("request data:", self.request.data)
+        id_numbers = self.request.data.get('id_number_pairs')
+        # Convert the JSON string representation of the list to an actual list
+        import ast
+        id_numbers = ast.literal_eval(id_numbers)
+        
+        for index, sub_category_id in enumerate(id_numbers, start=1):  # Start numbering from 1
+            try:
+                sub_category = SubCategory.objects.get(id=sub_category_id)
+                sub_category.sub_category_number = index  # Use the index as the new number
+                sub_category.save()
+            except SubCategory.DoesNotExist:
+                print(f"SubCategory with ID {sub_category_id} does not exist.")
+                
+        return Response({"message": "SubCategory renumbered successfully."})
+
+class UnitRenumberView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        id_numbers = self.request.data.get('id_number_pairs')
+        # Convert the JSON string representation of the list to an actual list
+        import ast
+        id_numbers = ast.literal_eval(id_numbers)
+        
+        for index, unit_id in enumerate(id_numbers, start=1):  # Start numbering from 1
+           
+            try:
+                unit = Unit.objects.get(id=unit_id)
+                unit.unit_number = index  # Use the index as the new number
+                unit.save()
+            except Unit.DoesNotExist:
+                print(f"Unit with ID {unit_id} does not exist.")
+                
+        return Response({"message": "Units renumbered successfully."})
+            
+
+class QuizRenumberView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        id_numbers = self.request.data.get('id_number_pairs')
+        # Convert the JSON string representation of the list to an actual list
+        import ast
+        id_numbers = ast.literal_eval(id_numbers)
+        
+        for index, quiz_id in enumerate(id_numbers, start=1):  # Start numbering from 1
+        
+            try:
+                quiz = Quiz.objects.get(id=quiz_id)
+                quiz.quiz_number = index  # Use the index as the new number
+                quiz.save()
+            except Quiz.DoesNotExist:
+                print(f"Quiz with ID {quiz_id} does not exist.")
+                
+        return Response({"message": "Questions renumbered successfully."})
+            
+
+class QuestionRenumberView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        print("request data:", self.request.data)
+        #request data: {'data_type': 'question', 'id_number_pairs': '[10,4,5,6]'}
+        id_numbers = self.request.data.get('id_number_pairs')
+        # Convert the string representation of the list to an actual list
+        import ast
+        id_numbers = ast.literal_eval(id_numbers)
+        print("after .... conversion: id_number_pairs:", id_numbers)
+      
+        for index, question_id in enumerate(id_numbers, start=1):  # Start numbering from 1
+            #question_id = question_id
+            try:
+                question = Question.objects.get(id=question_id)
+                question.question_number = index  # Use the index as the new number
+                question.save()
+                print(f"Updated Question ID {question_id} to new number {index}")
+            except Question.DoesNotExist:
+                print(f"Question with ID {question_id} does not exist.")
+                
+        return Response({"message": "Questions renumbered successfully."})
+            
+from django.apps import apps
+    
+class ItemDeleteView(generics.DestroyAPIView):
+    serializer_class = QuizSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        id = self.kwargs.get('pk')
+        # retrieve data_type from query parameters
+        print("ItemDeleteView .... request data:", self.request)
+        
+        data_type = self.request.query_params.get('data_type', 'question').lower() # Default to 'question' if not provided
+        #data_type = self.request.data.get('data_type', 'Question') # Default to 'Question' if not provided
+        queryset = None
+        print("ItemDeleteView get_queryset, data_type:", data_type, ", id:", id)
+        if data_type == 'question':
+            queryset = Question.objects.filter(id=id) 
+        elif data_type == 'quiz':
+            print("ItemDeleteView Quiz Delete .... id:", id)
+            queryset = Quiz.objects.filter(id=id)
+        elif data_type == 'unit':
+            queryset = Unit.objects.filter(id=id)
+        elif data_type == 'sub_category':
+            queryset = SubCategory.objects.filter(id=id)
+        elif data_type == 'category':
+            queryset = Category.objects.filter(id=id)
+            
+        
+        print("ItemDeleteView get_queryset, queryset:", queryset)
+        
         return queryset
     

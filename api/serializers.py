@@ -24,38 +24,43 @@ class NoteSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        #fields = ["id", "question_number", "content", "format", "audio_str", "instructions", "prompt", "answer_key"]
-        fields = '__all__'
+        fields = ["id", "quiz_id", "question_number", "content", "format", "answer_key", "instructions", "prompt", "audio_str", "score", "button_cloze_options", "word_scramble_direction", "timeout"]
+        #fields = '__all__'
         
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = ["id", "name", "quiz_number", "questions"]
+        fields = ["id", "unit_id", "name", "quiz_number"]
+        #extra_kwargs = {
+        #    "questions": {"required": False}  # Make the "questions" field optional
+        #}
         
+#fields = ["id", "unit_id", "name", "quiz_number", "questions"]
 
 class UnitSerializer(serializers.ModelSerializer):
     quizzes = QuizSerializer(many=True, read_only=True)
     class Meta:
         model = Unit
-        fields = ["id", "name", "unit_number", "quizzes"]
-        
-#class QuizSerializer(serializers.ModelSerializer):
-#    questions = QuestionSerializer(many=True, read_only=True)
-#    class Meta:
-#        model = Unit
-#        fields = ["id", "name", "unit_number", "questions"]
-       
-        
-        
+        fields = ["id", "sub_category_id", "name", "unit_number", "quizzes"]
+        #extra_kwargs = {
+        #    "quizzes": {"required": False}  # Make the "questions" field optional
+        #}
+             
 class SubCategorySerializer(serializers.ModelSerializer):
     units = UnitSerializer(many=True, read_only=True)
     class Meta:
         model = SubCategory
-        fields = ["id", "name", "sub_category_number", "units"]
+        fields = ["id", "category_id", "name", "sub_category_number", "units"]
+        extra_kwargs = {
+            "units": {"required": False}  # Make the "questions" field optional
+        }
         
 class CategorySerializer(serializers.ModelSerializer):
-    subcategories = SubCategorySerializer(many=True, read_only=True)
+    sub_categories = SubCategorySerializer(many=True, read_only=True)
     class Meta:
         model = Category
-        fields = ["id", "name", "category_number", "subcategories"]
+        fields = ["id", "name", "category_number", "sub_categories"]
         #extra_kwargs = {"author": {"read_only": True}}
+        extra_kwargs = {
+            "sub_categories": {"required": False}  # Make the "questions" field optional
+        }
