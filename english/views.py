@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from api.models import Note, Question, Quiz, Unit, SubCategory, Category
+from api.models import Note, Question, Quiz, Unit, SubCategory, Category, QuizAttempt, QuestionAttempt
 #from .serializers import NoteSerializer, QuestionSerializer
-from api.serializers import NoteSerializer, QuestionSerializer, SubCategorySerializer, CategorySerializer, CategorySerializer
+from api.serializers import NoteSerializer, QuestionSerializer, SubCategorySerializer, CategorySerializer, CategorySerializer, QuizAttemptSerializer, QuestionAttemptSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import generics
 from rest_framework.decorators import api_view
@@ -84,6 +84,66 @@ def quiz_list(request, pk):
     quizzes = Quiz.objects.filter(unit_id=pk).order_by('quiz_number')
     serializer = QuizSerializer(quizzes, many=True)
     return Response(serializer.data)
+#quiz_attempt_get_question_attempts
+@api_view(["GET"])
+def quiz_attempt_get_question_attempts(request, pk):
+    """
+    List all question attempts for a quiz attempt
+    """
+    #print("quiz_attempt_get_question_attempts called with pk:", pk)
+    try:
+        quiz_attempt = QuizAttempt.objects.get(id=pk)
+        question_attempts = QuestionAttempt.objects.filter(quiz_attempt_id=quiz_attempt.id)
+        serializer = QuestionAttemptSerializer(question_attempts, many=True)
+        return Response(serializer.data)
+    except QuizAttempt.DoesNotExist:
+        return Response({"error": "Quiz attempt not found."}, status=404)
+    
+    
+@api_view(["GET"])
+def quiz_attempt_list(request):
+    """
+    List all quizzes, 
+    """
+    quiz_attempts = QuizAttempt.objects.all()
+    serializer = QuizAttemptSerializer(quiz_attempts, many=True)
+    #print("****** quiz_attempt_list, serializer data:", serializer.data)
+    return Response(serializer.data)
+
+@api_view(["DELETE"])
+def quiz_attempt_delete(request, pk):
+    """
+    Delete a quiz attempt
+    """
+    #print("quiz_attempt_delete called with pk:", pk)
+    try:
+        quiz_attempt = QuizAttempt.objects.get(id=pk)
+        quiz_attempt.delete()
+        return Response({"message": "Quiz attempt deleted successfully."})
+    except QuizAttempt.DoesNotExist:
+        return Response({"error": "Quiz attempt not found."}, status=404)
+    
+@api_view(["POST"])
+def quiz_attempt_bulk_delete(request):
+    """
+    Delete bulk of quiz attempts
+    """
+    #print("quiz_attempt_delete called with pk:", pk)
+    #print("quiz_attempt_bulk_delete, request data:", request.data)
+    # request data : {'ids': ['18']}
+    ids = request.data.get('ids')
+    #print("quiz_attempt_bulk_delete, ids to delete:", ids)
+    deleted_count = 0
+    for quiz_attempt_id in ids:
+        try:
+            print("Deleting quiz attempt with ID:", quiz_attempt_id)
+            quiz_attempt = QuizAttempt.objects.get(id=quiz_attempt_id)
+            quiz_attempt.delete()
+            deleted_count += 1
+        except QuizAttempt.DoesNotExist:
+            print(f"Quiz attempt with ID {quiz_attempt_id} not found.")
+    return Response({"message": f"{deleted_count} quiz attempts deleted successfully."})    
+
 
             
 class SubCategoryCreateView(generics.ListCreateAPIView):

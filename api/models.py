@@ -62,3 +62,30 @@ class Question(models.Model):
     def __str__(self):
         return self.content
     
+class QuizAttempt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quiz_attempts")
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="quiz_attempts")
+    #user_id = models.IntegerField(default=0)
+    #quiz_id = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    questions_exhausted = models.BooleanField(default=False)
+    completion_status = models.CharField(max_length=50, default="uncompleted")  # e.g., "completed", "uncompleted"
+    errorneous_questions = models.CharField(max_length=200, blank=True, default="")  # e.g., "1,3,5"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.quiz.name} - {self.score} - {self.questions_exhausted}"
+    
+class QuestionAttempt(models.Model):
+    quiz_attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name="question_attempts")
+    #question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="question_attempts")
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="question_attempts", default=1)
+    error_flag = models.BooleanField(default=None, null=True)
+    completed = models.BooleanField(default=False)
+    score = models.IntegerField(default=0)
+    completed = models.BooleanField(default=False)
+    answer = models.CharField(max_length=1000, blank=True, null=True, default="")
+
+    def __str__(self):
+        return f"Attempt for {self.question.question_number}"

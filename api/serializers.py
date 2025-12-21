@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Note, Category, SubCategory, Unit, Quiz, Question
+from .models import Note, Category, SubCategory, Unit, Quiz, Question, QuestionAttempt, QuizAttempt
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,6 +27,8 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ["id", "quiz_id", "question_number", "content", "format", "answer_key", "instructions", "prompt", "audio_str", "score", "button_cloze_options", "word_scramble_direction", "timeout"]
         #fields = '__all__'
         
+        
+        
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
@@ -37,6 +39,18 @@ class QuizSerializer(serializers.ModelSerializer):
         
 #fields = ["id", "unit_id", "name", "quiz_number", "questions"]
 
+class QuizAttemptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizAttempt
+        fields = ["id", "quiz_id", "user_id", "score", "created_at", "updated_at", "completion_status", "questions_exhausted", "errorneous_questions"]
+        
+class QuestionAttemptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionAttempt
+        fields = ["id", "question_id", "quiz_attempt_id", "error_flag", "score",  "completed", "question_id"]
+
+  #question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="question_attempts")
+ 
 class UnitSerializer(serializers.ModelSerializer):
     quizzes = QuizSerializer(many=True, read_only=True)
     class Meta:

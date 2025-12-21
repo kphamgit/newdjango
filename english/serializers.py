@@ -1,6 +1,6 @@
 from rest_framework import serializers
 #from .models import Note
-from api.models import Unit, Quiz
+from api.models import Unit, Quiz, QuizAttempt
 
 class UnitSerializer(serializers.ModelSerializer):
     #quizzes = QuizSerializer(many=True, read_only=True)
@@ -19,3 +19,6 @@ class QuizSerializer(serializers.ModelSerializer):
         #    "questions": {"required": False}  # Make the "questions" field optional
         #}
         
+
+        
+#score | created_at | updated_at | questions_exhausted | quiz_id | user_id | completion_status | errorneous_questions 

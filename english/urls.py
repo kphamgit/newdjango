@@ -14,6 +14,10 @@ urlpatterns = [
     #list views
     path("sub_categories/<int:pk>/units", views.unit_list),
     path("units/<int:pk>/quizzes", views.quiz_list),
+    path("quiz_attempts/", views.quiz_attempt_list),
+    #path("quiz_attempts/<int:pk>/delete", views.quiz_attempt_delete),
+    path("quiz_attempts/bulk_delete/", views.quiz_attempt_bulk_delete),
+    path("quiz_attempts/<int:pk>/question_attempts/", views.quiz_attempt_get_question_attempts),
     
     path("sub_categories/", views.SubCategoryCreateView.as_view(), name="sub-category-create"),
     path("sub_categories/<int:pk>/", views.SubCategoryEditView.as_view(), name="sub-category-edit"),
