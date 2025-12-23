@@ -70,12 +70,11 @@ class QuizAttempt(models.Model):
     score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    questions_exhausted = models.BooleanField(default=False)
     completion_status = models.CharField(max_length=50, default="uncompleted")  # e.g., "completed", "uncompleted"
     errorneous_questions = models.CharField(max_length=200, blank=True, default="")  # e.g., "1,3,5"
 
     def __str__(self):
-        return f"{self.user.username} - {self.quiz.name} - {self.score} - {self.questions_exhausted}"
+        return f"{self.user.username} - {self.quiz.name} - {self.score}"
     
 class QuestionAttempt(models.Model):
     quiz_attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name="question_attempts")

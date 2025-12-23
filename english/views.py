@@ -136,7 +136,7 @@ def quiz_attempt_bulk_delete(request):
     deleted_count = 0
     for quiz_attempt_id in ids:
         try:
-            print("Deleting quiz attempt with ID:", quiz_attempt_id)
+            #print("Deleting quiz attempt with ID:", quiz_attempt_id)
             quiz_attempt = QuizAttempt.objects.get(id=quiz_attempt_id)
             quiz_attempt.delete()
             deleted_count += 1
