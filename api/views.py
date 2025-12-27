@@ -176,12 +176,25 @@ def create_quiz_attempt(request, pk):
             print("QuizAttempt already exists.")
             serializer = QuizAttemptSerializer(quiz_attempt)
             #retrieve all question_attempts for this quiz_attempt using one to many relationship
-            question_attempts = quiz_attempt.question_attempts.all()
+            #question_attempts = quiz_attempt.question_attempts.all()
+            #get the last question attempt of the quiz_attempt
+            last_question_attempt = quiz_attempt.question_attempts.order_by('-id').first()            
             #return a message indicating that the QuizAttempt already exists
-            return Response({
+            #but, first retrieve the question associated with the last question attempt
+            last_question = Question.objects.get(id=last_question_attempt.question_id) if last_question_attempt else None
+            # check question number of last question. If it is 1 (i.e., first question), return that question
+            if last_question.question_number == 1:
+                return Response({
+                    "created": False,
+                    "quiz_attempt": serializer.data,
+                    "question": QuestionSerializer(last_question).data,
+                    "last_question_attempt_id": last_question_attempt.id if last_question_attempt else None,
+                })
+            else:
+                return Response({
                 "created": False,
-                "question_id": 0,  # Add the additional information here
                 "quiz_attempt": serializer.data,
+                "last_question_attempt_id": last_question_attempt.id if last_question_attempt else None,
             })
         
 @api_view(["GET"])
@@ -198,7 +211,7 @@ def continue_quiz_attempt(request, pk):
                 print("Last QuestionAttempt is completed. Creating next QuestionAttempt.")
                 next_question = Question.objects.filter(quiz_id=quiz_attempt.quiz_id, question_number__gt=last_question_attempt.question.question_number).order_by('question_number').first()
                 if next_question:
-                    print("Next question found:", next_question.id)
+                    print("Next question found: question id = ", next_question.id)
                     question_attempt = QuestionAttempt.objects.create(
                         quiz_attempt=quiz_attempt,
                         question=next_question,
@@ -225,6 +238,7 @@ def continue_quiz_attempt(request, pk):
                 return Response({
                     "message": "Returning the current QuestionAttempt.",
                     "quiz_attempt_id": pk,
+                    "question_attempt_id": last_question_attempt.id,
                     "question": question_serializer.data
                 }) 
     
