@@ -24,7 +24,7 @@ class NoteSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ["id", "quiz_id", "question_number", "content", "format", "answer_key", "instructions", "prompt", "audio_str", "score", "button_cloze_options", "word_scramble_direction", "timeout"]
+        fields = ["id", "quiz_id", "question_number", "content", "format", "answer_key", "instructions", "prompt", "audio_str", "score", "button_cloze_options", "timeout"]
         #fields = '__all__'
         
         
@@ -69,8 +69,13 @@ class SubCategorySerializer(serializers.ModelSerializer):
             "units": {"required": False}  # Make the "questions" field optional
         }
         
+class SubCategoryWithoutUnitsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = ["id", "category_id", "name", "sub_category_number"]
+
 class CategorySerializer(serializers.ModelSerializer):
-    sub_categories = SubCategorySerializer(many=True, read_only=True)
+    sub_categories = SubCategoryWithoutUnitsSerializer(many=True, read_only=True)
     class Meta:
         model = Category
         fields = ["id", "name", "category_number", "sub_categories"]
@@ -78,3 +83,6 @@ class CategorySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "sub_categories": {"required": False}  # Make the "questions" field optional
         }
+       
+        
+    

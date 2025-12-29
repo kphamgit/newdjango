@@ -55,7 +55,6 @@ class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
     answer_key = models.TextField(max_length=500, default="")
     score = models.IntegerField(default=0, null=True)
-    word_scramble_direction = models.CharField(max_length=1, blank=True, null=True, default="")
     timeout = models.IntegerField(default=0, null=True)  # in miliseconds
     button_cloze_options=models.TextField(max_length=200, blank=True, null=True, default="") 
     

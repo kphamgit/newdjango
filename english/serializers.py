@@ -1,15 +1,6 @@
 from rest_framework import serializers
 #from .models import Note
-from api.models import Unit, Quiz, QuizAttempt
-
-class UnitSerializer(serializers.ModelSerializer):
-    #quizzes = QuizSerializer(many=True, read_only=True)
-    class Meta:
-        model = Unit
-        fields = ["id", "sub_category_id", "name", "unit_number"]
-        #extra_kwargs = {
-        #    "quizzes": {"required": False}  # Make the "questions" field optional
-        #}
+from api.models import Unit, Quiz, SubCategory, Category
 
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,7 +9,63 @@ class QuizSerializer(serializers.ModelSerializer):
         #extra_kwargs = {
         #    "questions": {"required": False}  # Make the "questions" field optional
         #}
-        
 
-        
-#score | created_at | updated_at | questions_exhausted | quiz_id | user_id | completion_status | errorneous_questions 
+    """
+class UnitSerializer(serializers.ModelSerializer):
+    quizzes = QuizSerializer(many=True, read_only=True)
+    class Meta:
+        model = Unit
+        fields = ["id", "sub_category_id", "name", "unit_number", "quizzes"]
+        #extra_kwargs = {
+        #    "quizzes": {"required": False}  # Make the "questions" field optional
+        #}
+        """
+
+class UnitSerializer(serializers.ModelSerializer):
+    #quizzes = QuizSerializer(many=True, read_only=True)
+    class Meta:
+        model = Unit
+        fields = ["id", "sub_category_id", "name", "unit_number"]
+        #extra_kwargs = {
+        #    "units": {"required": False}  # Make the "questions" field optional
+        #}
+
+class SubCategorySerializer(serializers.ModelSerializer):
+    #units = UnitSerializer(many=True, read_only=True)
+    #print("Inside ENGLISH SubCategorySerializer")
+    class Meta:
+        model = SubCategory
+        fields = ["id", "category_id", "name", "sub_category_number"]
+        #extra_kwargs = {
+        #    "units": {"required": False}  # Make the "questions" field optional
+        #}
+    """
+    def __init__(self, *args, **kwargs):
+        # Dynamically exclude sub_categories if specified in the context
+        exclude_units = kwargs.pop('context', {}).get('exclude_units', False)
+        super().__init__(*args, **kwargs)
+        if exclude_units:
+            self.fields.pop('units', None)  # Remove the sub_categories field
+    """
+    
+"""
+class CategorySerializer(serializers.ModelSerializer):
+    sub_categories = SubCategorySerializer(many=True, read_only=True)
+    print("Inside ENGLISH CategorySerializer")
+    class Meta:
+        model = Category
+        fields = ["id", "name", "category_number", "sub_categories"]
+
+    def __init__(self, *args, **kwargs):
+        # Dynamically exclude sub_categories if specified in the context
+        exclude_sub_categories = kwargs.pop('context', {}).get('exclude_sub_categories', False)
+        super().__init__(*args, **kwargs)
+        if exclude_sub_categories:
+            self.fields.pop('sub_categories', None)  # Remove the sub_categories field
+"""
+class CategorySerializer(serializers.ModelSerializer):
+    #sub_categories = SubCategorySerializer(many=True, read_only=True)
+    #print("Inside ENGLISH ... CategorySerializer")
+    class Meta:
+        model = Category
+        fields = ["id", "name", "category_number"]
