@@ -18,10 +18,20 @@ class Level(models.Model):
     def __str__(self):
         return self.name
     
+"""
 class Category(models.Model):
     name = models.CharField(max_length=100)
     category_number = models.IntegerField()
     level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name="categories", default=1)
+    
+    def __str__(self):
+        return self.name
+"""
+        
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    category_number = models.IntegerField()
+    level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name="categories", default=None, null=True)
     
     def __str__(self):
         return self.name
