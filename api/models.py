@@ -11,9 +11,17 @@ class Note(models.Model):
     def __str__(self):
         return self.title
 
+class Level(models.Model):
+    name = models.CharField(max_length=100)
+    level_number = models.IntegerField()
+    
+    def __str__(self):
+        return self.name
+    
 class Category(models.Model):
     name = models.CharField(max_length=100)
     category_number = models.IntegerField()
+    level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name="categories", default=1)
     
     def __str__(self):
         return self.name
@@ -29,7 +37,7 @@ class SubCategory(models.Model):
 class Unit(models.Model):
     name = models.CharField(max_length=100)
     unit_number = models.IntegerField()
-    sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name="units")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="units", default=1)
     
     def __str__(self):
         return self.name

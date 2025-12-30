@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework import generics
-from api.serializers import UserSerializer, CategorySerializer, SubCategorySerializer, UnitSerializer, QuizSerializer, QuestionSerializer, QuizAttemptSerializer, QuestionAttemptSerializer
+from api.serializers import LevelSerializer,  UserSerializer, CategorySerializer, UnitSerializer, QuizSerializer, QuestionSerializer, QuizAttemptSerializer, QuestionAttemptSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Category, SubCategory, Unit, Quiz, Question, QuizAttempt, QuestionAttempt
+from .models import Category, SubCategory, Unit, Quiz, Question, QuizAttempt, QuestionAttempt, Level
 from rest_framework.decorators import api_view
 
 
@@ -32,10 +32,11 @@ class CategoryCreate(generics.CreateAPIView):
 """
 
 @api_view(["GET"])
-def category_list(request):
-    categories = Category.objects.order_by('category_number')
-    serializer = CategorySerializer(categories, many=True)
-    #print("category_list serializer.data:", serializer.data)
+def level_list(request):
+    #print("level_list called")
+    levels = Level.objects.order_by('level_number')
+    serializer = LevelSerializer(levels, many=True)
+    #print("level_list serializer.data:", serializer.data)
     return Response(serializer.data)
     
 class UnitListView(generics.ListAPIView):
@@ -45,10 +46,8 @@ class UnitListView(generics.ListAPIView):
     
 
     def get_queryset(self):
-        sub_category_id = self.kwargs.get('sub_category_id')
-        #print("UnitListView, sub_category_id:", sub_category_id)
-        #queryset = Unit.objects.filter(sub_category_id=sub_category_id).prefetch_related('quizzes')
-        queryset = Unit.objects.filter(sub_category_id=sub_category_id).order_by('unit_number')
+        category_id = self.kwargs.get('category_id')
+        queryset = Unit.objects.filter(category_id=category_id).order_by('unit_number')
         #print("UnitListView, Filtered Units no Prefetch:", queryset)
         #print("UnitListView, SQL Query:", queryset.query)  # Debugging SQL query
         return queryset
@@ -126,7 +125,7 @@ def create_quiz_attempt(request, pk):
                 })
                 
         else:
-            print("QuizAttempt already exists.")
+            #print("QuizAttempt already exists.")
             serializer = QuizAttemptSerializer(quiz_attempt)
             #retrieve all question_attempts for this quiz_attempt using one to many relationship
             #question_attempts = quiz_attempt.question_attempts.all()

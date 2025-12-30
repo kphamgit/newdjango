@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from api.models import Question, Quiz, Unit, SubCategory, Category, QuizAttempt, QuestionAttempt
-from .serializers import CategorySerializer, SubCategorySerializer, UnitSerializer, QuizSerializer
+from api.models import Question, Quiz, Unit, SubCategory, Level, Category, QuizAttempt, QuestionAttempt
+from .serializers import CategorySerializer, UnitSerializer, QuizSerializer, LevelSerializer
 from api.serializers import QuestionSerializer, QuizAttemptSerializer, QuestionAttemptSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import generics
@@ -13,7 +13,7 @@ class CategoryCreateView(generics.CreateAPIView):
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
     queryset = Category.objects.all()  # Add this line
-
+    #print("********* CategoryCreateView called")
     def perform_create(self, serializer):
         if serializer.is_valid():
             serializer.save(
@@ -23,34 +23,25 @@ class CategoryCreateView(generics.CreateAPIView):
         else:
             print(serializer.errors)
 
-class CategoryListView(generics.ListAPIView):
-    serializer_class = CategorySerializer  # Use the serializer with sub_categories by default
+class LevelListView(generics.ListAPIView):
+    serializer_class = LevelSerializer  # Use the serializer with sub_categories by default
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         # Fetch all categories, prefetching sub_categories for optimization
-        return Category.objects.order_by('category_number')
-    """
-    def get_serializer(self, *args, **kwargs):
-        # Check if the request includes a query parameter to exclude sub_categories
-        exclude_sub_categories = self.request.query_params.get('exclude_sub_categories', 'false').lower() == 'true'
-        # Pass the context to the serializer
-        kwargs['context'] = {'exclude_sub_categories': True}
-        return super().get_serializer(*args, **kwargs)
-    """
+        return Level.objects.order_by('level_number')
 
-class SubCategoryListView(generics.ListAPIView):
-    serializer_class = SubCategorySerializer  # Use the serializer with sub_categories by default
+class CategoryListView(generics.ListAPIView):
+    serializer_class = CategorySerializer  # Use the serializer with sub_categories by default
     permission_classes = [IsAuthenticated]
     # get pk from url to filter subcategories by category_id
-    
-    
-    #print("ENGLISH SubCategoryListView ****** called")
+    #print("ENGLISH CategoryListView ****** called")
     def get_queryset(self):
         # Fetch all categories, prefetching sub_categories for optimization, filter by pk
         pk = self.kwargs.get('pk')
+        #print("ENGLISH CategoryListView ****** called, pk", pk)
         #print("SubCategoryListView, category_id (pk):", pk)
-        return SubCategory.objects.filter(category_id=pk).order_by('sub_category_number')
+        return Category.objects.filter(level_id=pk).order_by('category_number')
 
 
 """
@@ -78,7 +69,7 @@ class UnitListView(generics.ListAPIView):
     def get_queryset(self):
         pk = self.kwargs.get('pk')
         # Fetch all categories, prefetching sub_categories for optimization
-        return Unit.objects.filter(sub_category_id=pk).order_by('unit_number')
+        return Unit.objects.filter(category_id=pk).order_by('unit_number')
     
 class QuizListView(generics.ListAPIView):
     serializer_class = QuizSerializer  # Use the serializer with sub_categories by default
@@ -124,7 +115,7 @@ class QuestionCreateView(generics.ListCreateAPIView):
     #fields = ["id", "unit_id", "name", "quiz_number", "questions"]
 class QuizCreateView(generics.ListCreateAPIView):
     serializer_class = QuizSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         #print("perform_create, request data:", self.request.data)
@@ -144,7 +135,7 @@ class UnitCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         if serializer.is_valid():
             serializer.save(
-                sub_category_id=self.request.data.get('sub_category_id'),
+                category_id=self.request.data.get('category_id'),
                 unit_number=self.request.data.get('unit_number'),
                 name=self.request.data.get('name')
             )
@@ -206,30 +197,30 @@ def quiz_attempt_bulk_delete(request):
     return Response({"message": f"{deleted_count} quiz attempts deleted successfully."})    
 
 
-            
-class SubCategoryCreateView(generics.ListCreateAPIView):
-    serializer_class = SubCategorySerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        print("********* SubCategoryCreateView perform_create, request data:", self.request.data)
-        if serializer.is_valid():
-            serializer.save(
-                category_id=self.request.data.get('category_id'),
-                sub_category_number=self.request.data.get('sub_category_number'),
-                name=self.request.data.get('name')
-            )
-        else:
-            print(serializer.errors)
-            
+        
 class CategoryCreateView(generics.ListCreateAPIView):
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        print("********* CategoryCreateView perform_create, request data:", self.request.data)
         if serializer.is_valid():
-            serializer.save(category_number=self.request.data.get('category_number'),
-                            name=self.request.data.get('name')
+            serializer.save(
+                level_id=self.request.data.get('level_id'),
+                category_number=self.request.data.get('category_number'),
+                name=self.request.data.get('name')
+            )
+        else:
+            print(serializer.errors)
+
+class LevelCreateView(generics.CreateAPIView):
+    serializer_class = LevelSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            serializer.save(level_number=self.request.data.get('level_number'),
+                name=self.request.data.get('name')
             )
         else:
             print(serializer.errors)
@@ -308,11 +299,11 @@ class UnitEditView(generics.RetrieveUpdateAPIView):
         #print("QuestionListView, Filtered Questions no Prefetch:", queryset)
         #print("QuestionListView, SQL Query:", queryset.query)  # Debugging SQL query
         return queryset
-    
-class SubCategoryEditView(generics.RetrieveUpdateAPIView):
-    serializer_class = SubCategorySerializer
+
+
+class CategoryEditView(generics.RetrieveUpdateAPIView):
+    serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
-    #queryset = Question.objects.filter(question_id=question_id)  # Add this line
     def perform_update(self, serializer):
         #print("request data:", self.request.data)
         if serializer.is_valid():
@@ -324,17 +315,15 @@ class SubCategoryEditView(generics.RetrieveUpdateAPIView):
             print(serializer.errors)
             
     def get_queryset(self):
-        sub_category_id = self.kwargs.get('pk')
-        #queryset = Unit.objects.filter(sub_category_id=sub_category_id).prefetch_related('quizzes')
-        queryset = SubCategory.objects.filter(id=sub_category_id)
+        category_id = self.kwargs.get('pk')
+        queryset = Category.objects.filter(id=category_id)
         #print("QuestionListView, Filtered Questions no Prefetch:", queryset)
         #print("QuestionListView, SQL Query:", queryset.query)  # Debugging SQL query
         return queryset
-    
-class CategoryEditView(generics.RetrieveUpdateAPIView):
-    serializer_class = CategorySerializer
-    permission_classes = [AllowAny]
-    #queryset = Question.objects.filter(question_id=question_id)  # Add this line
+
+class LevelEditView(generics.RetrieveUpdateAPIView):
+    serializer_class = LevelSerializer
+    permission_classes = [IsAuthenticated]
     def perform_update(self, serializer):
         print("request data:", self.request.data)
         if serializer.is_valid():
@@ -346,12 +335,12 @@ class CategoryEditView(generics.RetrieveUpdateAPIView):
             print(serializer.errors)
             
     def get_queryset(self):
-        category_id = self.kwargs.get('pk')
+        level_id = self.kwargs.get('pk')
         #print("XXXXXX category_id:", category_id)
         #queryset = Unit.objects.filter(sub_category_id=sub_category_id).prefetch_related('quizzes')
-        queryset = Category.objects.filter(id=category_id)
-        #print("QuestionListView, Filtered Questions no Prefetch:", queryset)
-        #print("QuestionListView, SQL Query:", queryset.query)  # Debugging SQL query
+        queryset = Level.objects.filter(id=level_id)
+        #print("LevelEditView, Filtered Questions no Prefetch:", queryset)
+        #print("LevelEditView, SQL Query:", queryset.query)  # Debugging SQL query
         return queryset
     
 from rest_framework.response import Response

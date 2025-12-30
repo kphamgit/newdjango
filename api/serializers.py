@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Note, Category, SubCategory, Unit, Quiz, Question, QuestionAttempt, QuizAttempt
+from .models import Note, Category, Level, SubCategory, Unit, Quiz, Question, QuestionAttempt, QuizAttempt
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -55,34 +55,32 @@ class UnitSerializer(serializers.ModelSerializer):
     quizzes = QuizSerializer(many=True, read_only=True)
     class Meta:
         model = Unit
-        fields = ["id", "sub_category_id", "name", "unit_number", "quizzes"]
+        fields = ["id", "category_id", "name", "unit_number", "quizzes"]
         #extra_kwargs = {
         #    "quizzes": {"required": False}  # Make the "questions" field optional
         #}
              
-class SubCategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     units = UnitSerializer(many=True, read_only=True)
     class Meta:
-        model = SubCategory
-        fields = ["id", "category_id", "name", "sub_category_number", "units"]
+        model = Category
+        fields = ["id", "category_id", "name", "category_number", "units"]
         extra_kwargs = {
             "units": {"required": False}  # Make the "questions" field optional
         }
         
-class SubCategoryWithoutUnitsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubCategory
-        fields = ["id", "category_id", "name", "sub_category_number"]
-
-class CategorySerializer(serializers.ModelSerializer):
-    sub_categories = SubCategoryWithoutUnitsSerializer(many=True, read_only=True)
+class CategoryWithoutUnitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ["id", "name", "category_number", "sub_categories"]
+        fields = ["id", "level_id", "name", "category_number"]
+
+class LevelSerializer(serializers.ModelSerializer):
+    categories = CategoryWithoutUnitsSerializer(many=True, read_only=True)
+    class Meta:
+        model = Level
+        fields = ["id", "name", "level_number", "categories"]
         #extra_kwargs = {"author": {"read_only": True}}
         extra_kwargs = {
-            "sub_categories": {"required": False}  # Make the "questions" field optional
+            "categories": {"required": False}  # Make the "questions" field optional
         }
-       
-        
     
