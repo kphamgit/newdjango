@@ -36,14 +36,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
         
-class SubCategory(models.Model):
-    name = models.CharField(max_length=100)
-    sub_category_number = models.IntegerField()
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="sub_categories")
-    
-    def __str__(self):
-        return self.name
-
 class Unit(models.Model):
     name = models.CharField(max_length=100)
     unit_number = models.IntegerField()

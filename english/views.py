@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from api.models import Question, Quiz, Unit, SubCategory, Level, Category, QuizAttempt, QuestionAttempt
+from api.models import Question, Quiz, Unit, Level, Category, QuizAttempt, QuestionAttempt
 from .serializers import CategorySerializer, UnitSerializer, QuizSerializer, LevelSerializer
 from api.serializers import QuestionSerializer, QuizAttemptSerializer, QuestionAttemptSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -34,33 +34,12 @@ class LevelListView(generics.ListAPIView):
 class CategoryListView(generics.ListAPIView):
     serializer_class = CategorySerializer  # Use the serializer with sub_categories by default
     permission_classes = [IsAuthenticated]
-    # get pk from url to filter subcategories by category_id
     #print("ENGLISH CategoryListView ****** called")
     def get_queryset(self):
         # Fetch all categories, prefetching sub_categories for optimization, filter by pk
         pk = self.kwargs.get('pk')
         #print("ENGLISH CategoryListView ****** called, pk", pk)
-        #print("SubCategoryListView, category_id (pk):", pk)
         return Category.objects.filter(level_id=pk).order_by('category_number')
-
-
-"""
-class SubCategoryListView(generics.ListAPIView):
-    serializer_class = SubCategorySerializer  # Use the serializer with sub_categories by default
-    permission_classes = [IsAuthenticated]
-    print("ENGLISH SubCategoryListView ****** called")
-    def get_queryset(self):
-        # Fetch all categories, prefetching sub_categories for optimization
-        return SubCategory.objects.order_by('sub_category_number').prefetch_related('units')
-
-    def get_serializer(self, *args, **kwargs):
-        # Check if the request includes a query parameter to exclude sub_categories
-        exclude_units = self.request.query_params.get('exclude_units', 'false').lower() == 'true'
-        print("SubCategoryListView, exclude_units:", exclude_units)
-        # Pass the context to the serializer
-        kwargs['context'] = {'exclude_units': exclude_units}
-        return super().get_serializer(*args, **kwargs)
-"""
 
 class UnitListView(generics.ListAPIView):
     serializer_class = UnitSerializer  # Use the serializer with sub_categories by default
@@ -347,6 +326,25 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 # renumber views
+class LevelRenumberView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        id_numbers = self.request.data.get('id_number_pairs')
+        # Convert the JSON string representation of the list to an actual list
+        import ast
+        id_numbers = ast.literal_eval(id_numbers)
+        
+        for index, level_id in enumerate(id_numbers, start=1):  # Start numbering from 1
+            try:
+                level = Level.objects.get(id=level_id)
+                level.level_number = index  # Use the index as the new number
+                level.save()
+            except Level.DoesNotExist:
+                print(f"Level with ID {level_id} does not exist.")
+                
+        return Response({"message": "Level renumbered successfully."})
+
 class CategoryRenumberView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -366,26 +364,6 @@ class CategoryRenumberView(APIView):
                 
         return Response({"message": "Category renumbered successfully."})
             
-class SubCategoryRenumberView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        print("request data:", self.request.data)
-        id_numbers = self.request.data.get('id_number_pairs')
-        # Convert the JSON string representation of the list to an actual list
-        import ast
-        id_numbers = ast.literal_eval(id_numbers)
-        
-        for index, sub_category_id in enumerate(id_numbers, start=1):  # Start numbering from 1
-            try:
-                sub_category = SubCategory.objects.get(id=sub_category_id)
-                sub_category.sub_category_number = index  # Use the index as the new number
-                sub_category.save()
-            except SubCategory.DoesNotExist:
-                print(f"SubCategory with ID {sub_category_id} does not exist.")
-                
-        return Response({"message": "SubCategory renumbered successfully."})
-
 class UnitRenumberView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -474,8 +452,8 @@ class ItemDeleteView(generics.DestroyAPIView):
             queryset = Quiz.objects.filter(id=id)
         elif data_type == 'unit':
             queryset = Unit.objects.filter(id=id)
-        elif data_type == 'sub_category':
-            queryset = SubCategory.objects.filter(id=id)
+        elif data_type == 'level':
+            queryset = Level.objects.filter(id=id)
         elif data_type == 'category':
             queryset = Category.objects.filter(id=id)
             

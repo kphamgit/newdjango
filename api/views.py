@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework import generics
-from api.serializers import LevelSerializer,  UserSerializer, CategorySerializer, UnitSerializer, QuizSerializer, QuestionSerializer, QuizAttemptSerializer, QuestionAttemptSerializer
+from api.serializers import LevelSerializer,  UserSerializer, UnitSerializer, QuestionSerializer, QuizAttemptSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Category, SubCategory, Unit, Quiz, Question, QuizAttempt, QuestionAttempt, Level
+from .models import Unit, Question, QuizAttempt, QuestionAttempt, Level
 from rest_framework.decorators import api_view
 
 
@@ -52,35 +52,7 @@ class UnitListView(generics.ListAPIView):
         #print("UnitListView, SQL Query:", queryset.query)  # Debugging SQL query
         return queryset
    
-""" 
-class QuestionListView(generics.ListAPIView):
-    serializer_class = QuestionSerializer
-    permission_classes = [IsAuthenticated]
-    #permission_classes = [AllowAny]
-
-    def get_queryset(self):
-        quiz_id = self.kwargs.get('quiz_id')
-        #print("QuestionListView, quiz_id:", quiz_id)
-        #queryset = Unit.objects.filter(sub_category_id=sub_category_id).prefetch_related('quizzes')
-        queryset = Question.objects.filter(quiz_id=quiz_id).order_by('question_number')
-        #print("QuestionListView, Filtered Questions no Prefetch:", queryset)
-        #print("QuestionListView, SQL Query:", queryset.query)  # Debugging SQL query
-        return queryset
-"""
             
-"""
-class SubCategoryListView(generics.ListAPIView):
-    serializer_class = SubCategorySerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        category_id = self.kwargs.get('category_id')
-        #queryset = Unit.objects.filter(category_id=category_id).prefetch_related('quizzes')
-        queryset = SubCategory.objects.filter(category_id=category_id).order_by('sub_category_number')
-        #print("Filtered SubCats:", queryset)
-        #print("SQL Query:", queryset.query)  # Debugging SQL query
-        return queryset
-"""
 @api_view(["POST"])
 def create_quiz_attempt(request, pk):
         """

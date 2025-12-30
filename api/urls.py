@@ -4,8 +4,6 @@ from django.http import JsonResponse
 
 urlpatterns = [
     path("levels/", views.level_list, name="level-list"),
-    #path("categories/list/", views.category_list, name="category-list"),
-    #there is no need SubCategoryListView here as categories/list/ provides categories with subcategories
     path("categories/<int:category_id>/units/", views.UnitListView.as_view(), name="unit-list"),
    
     path("quiz_attempts/<int:pk>/", views.create_quiz_attempt),     # pk is quiz_id
