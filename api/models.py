@@ -66,7 +66,7 @@ class Question(models.Model):
     answer_key = models.TextField(max_length=500, default="")
     score = models.IntegerField(default=0, null=True)
     timeout = models.IntegerField(default=0, null=True)  # in miliseconds
-    button_cloze_options=models.TextField(max_length=200, blank=True, null=True, default="") 
+    button_cloze_options=models.TextField(max_length=200, blank=True, null=True, default="")
     
     def __str__(self):
         return self.content

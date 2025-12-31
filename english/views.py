@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from api.models import Question, Quiz, Unit, Level, Category, QuizAttempt, QuestionAttempt
-from .serializers import CategorySerializer, UnitSerializer, QuizSerializer, LevelSerializer
-from api.serializers import QuestionSerializer, QuizAttemptSerializer, QuestionAttemptSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from .serializers import CategorySerializer, UnitSerializer, QuizSerializer, QuestionSerializer, LevelSerializer
+from api.serializers import QuizAttemptSerializer, QuestionAttemptSerializer
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from rest_framework.decorators import api_view
 
@@ -77,7 +77,7 @@ class QuestionCreateView(generics.ListCreateAPIView):
         #print("perform_create, request data:", self.request.data)
         if serializer.is_valid():
             #serializer.save()
-            #kpham: no need for explicit fields since all are included in serializer
+            #kpham: NO NEED for explicit fields since all are included in serializer
             serializer.save( 
                 question_number=self.request.data.get('question_number'),
                 format=self.request.data.get('format'),
@@ -85,7 +85,9 @@ class QuestionCreateView(generics.ListCreateAPIView):
                 quiz_id=self.request.data.get('quiz_id'),
                 answer_key=self.request.data.get('answer_key'),
                 instructions=self.request.data.get('instructions'),
-               
+                prompt=self.request.data.get('prompt'),
+                audio_str=self.request.data.get('audio_str'),
+                blank_prompts=self.request.data.get('blank_prompts'),
             )
             
         else:

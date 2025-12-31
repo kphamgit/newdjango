@@ -1,6 +1,13 @@
 from rest_framework import serializers
 #from .models import Note
-from api.models import Unit, Quiz, Category, Level
+from api.models import Unit, Quiz, Question, Category, Level
+
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ["id", "quiz_id", "question_number", "content", "format", "answer_key", "instructions", "prompt", "audio_str", "score", "button_cloze_options", "timeout"]
+        #fields = '__all__'
+        
 
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
