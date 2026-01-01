@@ -8,13 +8,15 @@ from rest_framework.decorators import api_view
 
 # Create your views here.
    
-# LIST VIEWS
+#  VIEWS
 class CategoryCreateView(generics.CreateAPIView):
+    print("********* CategoryCreateView called")
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
     queryset = Category.objects.all()  # Add this line
     #print("********* CategoryCreateView called")
     def perform_create(self, serializer):
+        print("********* CategoryCreateView perform_create, request data:", self.request.data)
         if serializer.is_valid():
             serializer.save(
                 category_number=self.request.data.get('category_number'),
@@ -305,7 +307,7 @@ class LevelEditView(generics.RetrieveUpdateAPIView):
     serializer_class = LevelSerializer
     permission_classes = [IsAuthenticated]
     def perform_update(self, serializer):
-        print("request data:", self.request.data)
+        print("LevelEditView request data:", self.request.data)
         if serializer.is_valid():
             print("Serializer is valid")
             serializer.save(

@@ -23,6 +23,7 @@ urlpatterns = [
     # END CREATE views
     
     # EDIT views
+    path("levels/<int:pk>/", views.LevelEditView.as_view(), name="level-edit"),
     path("categories/<int:pk>/", views.CategoryEditView.as_view(), name="category-edit"),
     path("questions/<int:pk>/", views.QuestionEditView.as_view(), name="question-edit"),
     path("quizzes/<int:pk>/", views.QuizEditView.as_view(), name="quiz-edit"),
