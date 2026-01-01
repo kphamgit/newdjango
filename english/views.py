@@ -87,7 +87,6 @@ class QuestionCreateView(generics.ListCreateAPIView):
                 instructions=self.request.data.get('instructions'),
                 prompt=self.request.data.get('prompt'),
                 audio_str=self.request.data.get('audio_str'),
-                blank_prompts=self.request.data.get('blank_prompts'),
             )
             
         else:
