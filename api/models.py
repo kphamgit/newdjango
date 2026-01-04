@@ -94,6 +94,7 @@ class QuestionAttempt(models.Model):
     score = models.IntegerField(default=0)
     completed = models.BooleanField(default=False)
     answer = models.CharField(max_length=1000, blank=True, null=True, default="")
+    is_review = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return f"Attempt for {self.question.question_number}"
