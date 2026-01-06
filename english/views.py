@@ -10,13 +10,13 @@ from rest_framework.decorators import api_view
    
 #  VIEWS
 class CategoryCreateView(generics.CreateAPIView):
-    print("********* CategoryCreateView called")
+    #print("********* CategoryCreateView called")
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
     queryset = Category.objects.all()  # Add this line
     #print("********* CategoryCreateView called")
     def perform_create(self, serializer):
-        print("********* CategoryCreateView perform_create, request data:", self.request.data)
+        #print("********* CategoryCreateView perform_create, request data:", self.request.data)
         if serializer.is_valid():
             serializer.save(
                 category_number=self.request.data.get('category_number'),
@@ -132,7 +132,8 @@ def quiz_attempt_get_question_attempts(request, pk):
     #print("quiz_attempt_get_question_attempts called with pk:", pk)
     try:
         quiz_attempt = QuizAttempt.objects.get(id=pk)
-        question_attempts = QuestionAttempt.objects.filter(quiz_attempt_id=quiz_attempt.id)
+        question_attempts = QuestionAttempt.objects.filter(quiz_attempt_id=quiz_attempt.id).order_by('id')
+         # Serialize the question attempts
         serializer = QuestionAttemptSerializer(question_attempts, many=True)
         return Response(serializer.data)
     except QuizAttempt.DoesNotExist:

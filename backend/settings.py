@@ -36,6 +36,9 @@ ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Session settings for DEVELOPMENT only. Remove and reduce SESSION_COOKIE_AGE for production.
+SESSION_COOKIE_AGE = 28800
+
 # Application definition
 
 INSTALLED_APPS = [

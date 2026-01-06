@@ -81,6 +81,7 @@ class QuizAttempt(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     completion_status = models.CharField(max_length=50, default="uncompleted")  # e.g., "completed", "uncompleted"
     errorneous_questions = models.CharField(max_length=200, blank=True, default="")  # e.g., "1,3,5"
+    review_state = models.BooleanField(default=False, null=False)
 
     def __str__(self):
         return f"{self.user.username} - {self.quiz.name} - {self.score}"
@@ -94,7 +95,6 @@ class QuestionAttempt(models.Model):
     score = models.IntegerField(default=0)
     completed = models.BooleanField(default=False)
     answer = models.CharField(max_length=1000, blank=True, null=True, default="")
-    is_review = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return f"Attempt for {self.question.question_number}"
