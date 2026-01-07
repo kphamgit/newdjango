@@ -80,7 +80,7 @@ def create_quiz_attempt(request, pk):
             defaults={'score': 0, 'user_id': request.data['user_id'], 'quiz_id' : pk}
         )
         if created:
-            #print("New QuizAttempt created.")
+            #print("***** New QuizAttempt created.")
             serializer = QuizAttemptSerializer(quiz_attempt)
             #print(" QQQQQQQQQQQ QuizAttempt created:", serializer.data)
             
@@ -111,7 +111,7 @@ def create_quiz_attempt(request, pk):
                 })
                 
         else:
-            #print("QuizAttempt already exists.")
+            #print("^^^^^^ QuizAttempt already exists.")
             serializer = QuizAttemptSerializer(quiz_attempt)
             #retrieve all question_attempts for this quiz_attempt using one to many relationship
             #question_attempts = quiz_attempt.question_attempts.all()
@@ -120,7 +120,7 @@ def create_quiz_attempt(request, pk):
             # check if last question attempt is completed
             if last_question_attempt and not last_question_attempt.completed:
                 # if not completed, return the same question
-                print("Returning incomplete last_question_attempt with  ")
+                #print("Returning incomplete last_question_attempt with  ")
                 return Response({
                     "quiz_attempt": serializer.data,
                     "created": False,
@@ -285,7 +285,7 @@ def create_question_attempt(request, pk):
 @api_view(["POST"])
 def process_question_attempt(request, pk):
     try: 
-        #print("process_question_attempt q attempt id", pk, " request.data:", request.data)
+        #print("process_question_attempt quiz attempt id", pk, " request.data:", request.data)
         assessment_results =  check_answer(request.data.get('format', ''), request.data.get('user_answer', ''), request.data.get('answer_key', ''))
         
         #print(" process_question_attempt, assessment_results:", assessment_results)
