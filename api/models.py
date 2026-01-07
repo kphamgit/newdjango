@@ -72,10 +72,11 @@ class Question(models.Model):
         return self.content
     
 class QuizAttempt(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quiz_attempts")
+    #user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quiz_attempts")
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="quiz_attempts")
     #user_id = models.IntegerField(default=0)
     #quiz_id = models.IntegerField(default=0)
+    user_name = models.CharField(max_length=50, default="")
     score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

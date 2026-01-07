@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 class QuizAttemptSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizAttempt
-        fields = ["id", "quiz_id", "user_id", "score", "created_at", "updated_at", "completion_status", "errorneous_questions", "review_state"]
+        fields = ["id", "quiz_id", "user_name",  "score", "created_at", "updated_at", "completion_status", "errorneous_questions", "review_state"]
         
 class QuestionAttemptSerializer(serializers.ModelSerializer):
     class Meta:
