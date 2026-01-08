@@ -5,7 +5,8 @@ from api.models import Unit, Quiz, Question, Category, Level
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ["id", "quiz_id", "question_number", "content", "format", "answer_key", "instructions", "prompt", "audio_str", "score", "button_cloze_options", "timeout"]
+        fields = ["id", "quiz_id", "question_number", "content", "format", "answer_key", "instructions", 
+        "prompt", "audio_str", "score", "button_cloze_options", "timeout", "hint", "explanation"]
         #fields = '__all__'
         
 
