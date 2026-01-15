@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
+import ssl
 import dj_database_url
 
 load_dotenv()
@@ -30,7 +31,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-xfxopbqaxbe+a@0cjvm8vy7!%#(tb%@hf9qp$!v%kk8ai5$%85'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+#DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ["*"]
 
@@ -42,6 +44,7 @@ SESSION_COOKIE_AGE = 28800
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'api.apps.ApiConfig',
     'english.apps.EnglishConfig',
     'django.contrib.admin',
@@ -100,8 +103,39 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+# 1. Get the Redis URL from Heroku (starts with rediss://)
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379')
 
+# 2. Setup SSL Context for Channels (Required for Heroku's self-signed certs)
+#ssl_context = ssl.SSLContext()
+#ssl_context.check_hostname = False
+#ssl_context.verify_mode = ssl.CERT_NONE
+
+#WSGI_APPLICATION = 'backend.wsgi.application'
+ASGI_APPLICATION = "backend.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [{
+                "address": REDIS_URL,
+                #"ssl": ssl_context,  # Critical for Heroku connections
+                #"ssl_cert_reqs": None, 
+            }],
+        },
+    },
+}
+
+# 4. Add CACHES (Using Django's built-in Redis backend)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "ssl_cert_reqs": None,  # Bypasses SSL cert validation on Heroku
+        }
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
